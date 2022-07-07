@@ -1,0 +1,26 @@
+{
+  "name": "fzq-puppeteer",
+  "version": "1.0.0",
+  "description": "利用nodejs操作浏览器",
+  "main": "app.js",
+  "scripts": {
+    "serve": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhuanjiaozm/fzq-puppeteer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zhuanjiaozm/fzq-puppeteer/issues"
+  },
+  "homepage": "https://github.com/zhuanjiaozm/fzq-puppeteer#readme",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "puppeteer": "^15.3.1"
+  }
+}
