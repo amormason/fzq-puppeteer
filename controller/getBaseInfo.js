@@ -7,14 +7,7 @@ const {
 
 
 const getBaseInfo = async () => {
-    const browser = await puppeteer.launch({
-        // headless: false,
-        // defaultViewport: {
-        //     width: 2560,
-        //     height: 1440
-        // },
-        // args: [`--window-size=${2560},${1440}`], // new option
-    });
+    const browser = await puppeteer.launch();
 
     const page = await browser.newPage();
     await page.goto(loginURL);
