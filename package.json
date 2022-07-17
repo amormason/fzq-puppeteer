@@ -4,7 +4,7 @@
   "description": "利用nodejs操作浏览器",
   "main": "app.js",
   "scripts": {
-    "serve": "nodemon app.js",
+    "serve": "nodemon updatePrice.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,7 +20,10 @@
   "homepage": "https://github.com/zhuanjiaozm/fzq-puppeteer#readme",
   "dependencies": {
     "fs": "^0.0.1-security",
+    "mongodb": "^4.7.0",
+    "node-xlsx": "^0.21.0",
     "path": "^0.12.7",
-    "puppeteer": "^15.3.1"
+    "puppeteer": "^15.3.1",
+    "util": "^0.12.4"
   }
 }

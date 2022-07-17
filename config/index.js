@@ -8,6 +8,9 @@ module.exports = {
         },
         'SoldOut': {
             status: 'inactive',
+        },
+        'Scheduled': {
+            status: 'schedule'
         }
     }
 }

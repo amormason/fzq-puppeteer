@@ -1,13 +1,30 @@
 const puppeteer = require('puppeteer');
-const { loginURL, vendorID, password } = require('../config');
+const {
+    loginURL,
+    vendorID,
+    password
+} = require('../config');
 
 
 const getBaseInfo = async () => {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        headless: false,
+        defaultViewport: {
+            width: 2560,
+            height: 1440
+        },
+        args: [`--window-size=${2560},${1440}`], // new option
+    });
+
     const page = await browser.newPage();
     await page.goto(loginURL);
-    await page.type('#id_form_signin > div.form-inputs > div.margin.bottom20 > input', vendorID, { delay: 10 });
-    await page.type('#id_form_signin > div.form-inputs > div:nth-child(2) > input', password, { delay: 10 });
+    debugger;
+    await page.type('#id_form_signin > div.form-inputs > div.margin.bottom20 > input', vendorID, {
+        delay: 10
+    });
+    await page.type('#id_form_signin > div.form-inputs > div:nth-child(2) > input', password, {
+        delay: 10
+    });
     let loginButton = await page.$('#id_btn_signin')
     await loginButton.click();
     await page.waitForNavigation();
