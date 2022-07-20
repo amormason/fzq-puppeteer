@@ -35,12 +35,12 @@ const json_to_sheet = (arr) => {
 }
 
 const getExcel = async (errorListWhenUpdateInv, idNotFundInWebPage) => {
-    const filename = path.join(__dirname, 'data/3.第3个网站更新结果.xlsx');
+    const filename = path.join(__dirname, '3.第3个网站更新结果.xlsx');
     const header_idNotFundInWebPage = ['商品名称', '颜色', 'run的名字', '库存数值'];
     const header_errorListWhenUpdateInv = ['错误的原因', '发生错误的网页', '商品名称', '商品ID', '发生错误的颜色/run'];
     var buffer = nodeXlsx.build([
         {
-            name: `这些商品在第三个网站上没找到--${idNotFundInWebPage.length}/${Object.keys(dataMap).length}条数据`,
+            name: `这些商品在第三个网站上没找到--${idNotFundInWebPage.length}[${Object.keys(dataMap).length}]条数据`,
             data: [header_idNotFundInWebPage, ...json_to_sheet(idNotFundInWebPage)]
         },
         {
@@ -300,7 +300,7 @@ const setUp = async () => {
             height: 1440
         },
         devtools: true,
-        args: [`--window-size=${2560},${1440}`], // new option
+        args: [`--window-size=${2560},${1440}`, '--no-sandbox', '--disable-setuid-sandbox'], // new option
     });
     matchData();
 }
