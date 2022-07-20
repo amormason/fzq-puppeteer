@@ -7,7 +7,7 @@ const {
 
 
 const getBaseInfo = async () => {
-    const browser = await puppeteer.launch({ dumpio: true });
+    const browser = await puppeteer.launch();
 
     const page = await browser.newPage();
     await page.goto(loginURL);
