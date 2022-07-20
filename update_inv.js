@@ -35,12 +35,12 @@ const json_to_sheet = (arr) => {
 }
 
 const getExcel = async (errorListWhenUpdateInv, idNotFundInWebPage) => {
-    const filename = path.join(__dirname, '3.第3个网站更新结果.xlsx');
+    const filename = path.join(__dirname, 'data/3.第3个网站更新结果.xlsx');
     const header_idNotFundInWebPage = ['商品名称', '颜色', 'run的名字', '库存数值'];
-    const header_errorListWhenUpdateInv = ['错误的原因', '发生错误的网页', '商品名称', '商品ID', '发生错误的颜色/run'];
+    const header_errorListWhenUpdateInv = ['错误的原因', '发生错误的网页', '商品名称', '商品ID', '发生错误的颜色run'];
     var buffer = nodeXlsx.build([
         {
-            name: `这些商品在第三个网站上没找到--${idNotFundInWebPage.length}[${Object.keys(dataMap).length}]条数据`,
+            name: `这些商品在第三个网站上没找到--${idNotFundInWebPage.length}(${Object.keys(dataMap).length})条数据`,
             data: [header_idNotFundInWebPage, ...json_to_sheet(idNotFundInWebPage)]
         },
         {
@@ -60,7 +60,7 @@ const getExcel = async (errorListWhenUpdateInv, idNotFundInWebPage) => {
 }
 
 
-const updateInv = async (product) => {
+const updateInv = async (product, keyIndex, leng) => {
     const pageURL = `https://brand.orangeshine.com/products/update/${product.id}/?redirect_url=/products/list/`;
     page = await browser.newPage();
     await page.setDefaultNavigationTimeout(0);
@@ -185,6 +185,10 @@ const updateInv = async (product) => {
 
     await page.close();
 
+    if (keyIndex + 1 === leng) {
+        browser.close();
+    }
+
 }
 
 const matchData = async () => {
@@ -255,7 +259,7 @@ const matchData = async () => {
         const product = allGoods[Object.keys(allGoods)[keyIndex]];
         console.log('');
         console.log(`正在更新第${keyIndex + 1}/${Object.keys(allGoods).length}:${product.name}[${product.id}], 已经发生了错误${errorListWhenUpdateInv.length}条`);
-        await updateInv(product, index, Object.keys(allGoods).length);
+        await updateInv(product, keyIndex, Object.keys(allGoods).length);
     }
 
     console.log('');
@@ -286,6 +290,9 @@ const matchData = async () => {
 
 
     getExcel(errorListWhenUpdateInv, idNotFundInWebPage);
+
+
+    return '';
 
 
 }
