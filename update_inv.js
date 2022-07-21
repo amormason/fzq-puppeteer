@@ -90,6 +90,7 @@ const updateInv = async (product, keyIndex, leng) => {
         $("#id_color_checkbox > li").each(function (index, item) {
             var color = $.trim($(item).find('label.text a').attr('title')).toUpperCase();
             colorsInWeb.push({ index, color });
+            $(item).find('input[type="checkbox"]').prop('checked', false);
         });
 
 
@@ -178,6 +179,7 @@ const updateInv = async (product, keyIndex, leng) => {
         return errorList;
 
     }, product);
+
     await page.waitForTimeout(5000 * Math.random());
     const save_button = await page.$('body > div.layout-fixed-header > div.main-panel > div.fixed-main-panel > div > div > div.card.border-bottom.padding.bottom10 > div > p > button.btn.btn-submit.btn-save');
     await save_button.click();
