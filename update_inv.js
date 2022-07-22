@@ -76,7 +76,7 @@ const updateInv = async (product, keyIndex, leng) => {
         let loginButton = await page.$('#id_btn_signin');
         await loginButton.click();
         await page.waitForNavigation();
-        await page.waitForTimeout(000);
+        await page.waitForTimeout(1000);
         const view_later_button = await page.$('#id-btn-su-view-later');
         await view_later_button.click();
         isFirstTime = false;
