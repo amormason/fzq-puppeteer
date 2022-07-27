@@ -195,7 +195,7 @@ const updateInv = async (product, keyIndex, leng) => {
 
 const matchData = async () => {
     dataMap = require("./data/0.allDataInWeb.json");
-    const oldTable = nodeXlsx.parse("./source-inv.xlsx"); //读取excel表格
+    const oldTable = nodeXlsx.parse("../source.xlsx"); //读取excel表格
     let old_content = oldTable[0].data; //取出excel文件中的第一个工作表中的全部数据
     old_content.splice(0, 1); //一般来说表中的第一条数据可能是标题没有用，所以删掉
 

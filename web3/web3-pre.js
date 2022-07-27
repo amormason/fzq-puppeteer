@@ -8,14 +8,8 @@ var path = require("path"); //系统路径模块
 const puppeteer = require('puppeteer');
 var fs = require('fs'); //文件模块
 var path = require('path'); //系统路径模块
-const {
-    getBaseInfo
-} = require('./controller/getBaseInfo');
-const {
-    tabMapObject,
-    vendorID,
-    password
-} = require('./config');
+const { getBaseInfo } = require('./controller/getBaseInfo');
+const { tabMapObject, vendorID, password } = require('./config');
 
 const getTabData = async (pageURL) => {
     const browser = await puppeteer.launch({
@@ -75,7 +69,7 @@ let allDataInWeb = [];
 const allGoodsMap = {};
 
 const checkPrice = () => {
-    const oldTable = nodeXlsx.parse("./source.xlsx"); //读取excel表格
+    const oldTable = nodeXlsx.parse("../source.xlsx"); //读取excel表格
     let old_content = oldTable[0].data; //取出excel文件中的第一个工作表中的全部数据
     old_content.splice(0, 1); //一般来说表中的第一条数据可能是标题没有用，所以删掉
     console.log("原始Excel数据共有" + old_content.length + "条");

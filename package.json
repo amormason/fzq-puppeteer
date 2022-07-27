@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "serve": "nodemon updatePrice.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update-web1-inv": "rm -rf ./web1/data && node ./web1/2.update-inv",
+    "web3-inv": "node ./web3/web3-pre && node ./web3/web3"
   },
   "repository": {
     "type": "git",

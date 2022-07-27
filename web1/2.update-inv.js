@@ -1,23 +1,32 @@
 const puppeteer = require('puppeteer');
-const fs = require("fs"); //文件模块
+const fs = require("fs");
+const nodeXlsx = require('node-xlsx'); //文件模块
 const path = require("path"); //系统路径模块
+const { loginURL, username, password, verification_code } = require('./config');
+const matchID = require('./1.match-id');
 
+const json_to_sheet = (arr) => {
+    let result = [];
+    arr.forEach(element => {
+        let row = [];
+        Object.keys(element).map(col => {
+            if (Object.prototype.toString.call(element[col]) !== '[Object Object]') {
+                row.push(element[col])
+            }
+        })
+        result.push(row);
+    });
+    return result;
+}
 
-const {
-    loginURL,
-    username,
-    password,
-    verification_code
-} = require('./config-web1');
-const allGoods = require("./config-web1/allgoods.json");
-
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 let isNeedLogin = true;
-let errorList;
+let errorListWhenUpdateInv;
 let page;
 
 const only_set_inventory_value = async (page, product) => {
     const updateResult = await page.evaluate((current) => {
-        var errorList = JSON.parse(localStorage.getItem('errorList')) || [];
+        var errorListWhenUpdateInv = JSON.parse(localStorage.getItem('errorListWhenUpdateInv')) || [];
         var src = document.location.href;
         const _$ = $;
         const runsTR = [];
@@ -61,8 +70,10 @@ const only_set_inventory_value = async (page, product) => {
                 // 如果颜色存在,那么再检查该颜色的所有run是否存在
                 colorObject[color].map(inventoryInExcel => {  //[{"runName":"B12","inventory":999}]
                     if (!inventoryArrayInWeb.includes(inventoryInExcel.runName)) {
-                        errorList.push({
-                            ...current,
+                        errorListWhenUpdateInv.push({
+                            id: current.id,
+                            name: current.name,
+                            display: current.display,
                             src: src,
                             error: `${current.name}[${current.id}]-color[${color}]的run名字[${inventoryInExcel.runName}]不存在网页中`
                         });
@@ -85,17 +96,19 @@ const only_set_inventory_value = async (page, product) => {
                     }
                 })
             } else {
-                errorList.push({
-                    ...current,
+                errorListWhenUpdateInv.push({
+                    id: current.id,
+                    name: current.name,
+                    display: current.display,
                     src: src,
                     error: `颜色[${color}]不存在网页中`
                 });
                 console.error(`颜色[${color}]不存在网页中`);
             }
         });
-        localStorage.setItem('errorList', JSON.stringify(errorList));
+        localStorage.setItem('errorListWhenUpdateInv', JSON.stringify(errorListWhenUpdateInv));
         return {
-            errorList,
+            errorListWhenUpdateInv,
             isNeedDisplay: _$("#maintbl > tbody > tr:nth-child(1) > td:nth-child(2) > span > input.btn2.show_button.save_form_here").attr('style') !== 'display:none;'
         };
     }, product);
@@ -122,7 +135,6 @@ const update_inv = async (product) => {
             }
         })
 
-
         await page.goto(loginURL);
         await page.type('#uname', username, {
             delay: 10
@@ -140,14 +152,14 @@ const update_inv = async (product) => {
         let submit_button = await page.$('body > form > div.login > div.login_flds > div.fl_r > div:nth-child(3) > input');
         await submit_button.click();
         await page.waitForNavigation();
-        console.log('1/n 页面登录成功了');
+        console.log('1.正式更新数据时候 - 登录成功');
         isNeedLogin = false;
     }
 
 
     await page.goto('https://admin.lashowroom.com/old_item_edit.php?item_id=' + product.id);
 
-    const { isNeedDisplay, errorList } = await only_set_inventory_value(page, product);
+    const { isNeedDisplay, errorListWhenUpdateInv } = await only_set_inventory_value(page, product);
 
     if (isNeedDisplay) { //需要改为显示
         console.log(`当前商品需要更新显示状态为display: ${product.name}[${product.id}]`);
@@ -162,25 +174,59 @@ const update_inv = async (product) => {
     await page.waitForTimeout(1000);
     // await page.close();
     // await browser.close();
-    return errorList;
+    return errorListWhenUpdateInv;
 };
 
 (async () => {
-    for (let keyIndex = 0; keyIndex < Object.keys(allGoods).length; keyIndex++) {
-        const product = allGoods[Object.keys(allGoods)[keyIndex]];
+    const { allGoodsList, idNotFundForUpdate: idNotFundInWebPage = [], goodsListInWeb } = await matchID();
+    await sleep(5000);
+    for (let keyIndex = 0; keyIndex < allGoodsList.length; keyIndex++) {
+        const product = allGoodsList[keyIndex];
         console.log('');
-        console.log(`正在更新第${keyIndex + 1}/${Object.keys(allGoods).length}:${product.name}[${product.id}]}条`);
-        errorList = await update_inv(product, keyIndex, Object.keys(allGoods).length);
+        console.log(`正在更新第${keyIndex + 1}/${allGoodsList.length}条: ${product.name} (商品id是: ${product.id}`);
+        errorListWhenUpdateInv = await update_inv(product);
+        errorListWhenUpdateInv = errorListWhenUpdateInv.sort((a, b) => {
+            var x = a.name.toLowerCase();
+            var y = b.name.toLowerCase();
+            if (x < y) { return -1; }
+            if (x > y) { return 1; }
+            return 0;
+        })
     }
-    console.log(`第1个网站更新时候发生错误的数量是: ${errorList.launch}`);
-    var content = JSON.stringify(errorList);
-    //指定创建目录及文件名称，__dirname为执行当前js文件的目录
-    var file = path.join(__dirname, 'data/第1个网站的更新库存时候失败记录汇总.json');
-    //写入文件
-    await fs.writeFile(file, content, function (err) {
-        if (err) {
-            return console.log(err);
+
+    console.log(``); console.log(``);
+    console.log(`第1个网站更新时候发生错误的数量是: ${errorListWhenUpdateInv.length}`);
+
+    const filename = path.join(__dirname, 'data/第1个网站更新结果.xlsx');
+    const header_goodsListInWeb = ['商品ID', '商品名称', '商品列表中的页码', 'display属性'];
+    const header_idNotFundInWebPage = ['商品名称', '颜色', 'run的名字', '库存数值'];
+    const header_errorListWhenUpdateInv = ['商品ID', '商品名称', '颜色', '详情的链接', '错误的原因'];
+    var buffer = nodeXlsx.build([
+        {
+            name: `在第1个网站上没找到的商品--${idNotFundInWebPage.length}条数据`,
+            data: [header_idNotFundInWebPage, ...json_to_sheet(idNotFundInWebPage)]
+        },
+        {
+            name: `更新库存数据时候发生错误--${errorListWhenUpdateInv.length}条数据`,
+            data: [header_errorListWhenUpdateInv, ...json_to_sheet(errorListWhenUpdateInv)]
+        },
+        {
+            name: `当前网站上的数据--${goodsListInWeb.length}条数据`,
+            data: [header_goodsListInWeb, ...json_to_sheet(goodsListInWeb)]
         }
-        console.log('第1个网站更新完成并生成了报表：' + file);
-    });
+
+    ]);
+
+    //写入文件
+    await fs.appendFile(filename, buffer, (err) => {
+        if (err) {
+            console.log(err, '保存excel出错')
+        } else {
+            console.log('写入成功: ', filename);
+        }
+    })
+    return {
+        errorListWhenUpdateInv,
+        idNotFundInWebPage
+    }
 })();

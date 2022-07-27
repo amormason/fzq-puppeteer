@@ -11,7 +11,7 @@ var path = require("path"); //系统路径模块
 
 const {
     getWebData
-} = require('./app')
+} = require('./web3-pre')
 var allData = require("./allDataInWeb.json");
 
 // npm i -S node-xlsx  fs path
