@@ -25,6 +25,7 @@ let errorListWhenUpdateInv;
 let page;
 
 const only_set_inventory_value = async (page, product) => {
+    await page.waitForTimeout(2000);
     const updateResult = await page.evaluate((current) => {
         var errorListWhenUpdateInv = JSON.parse(localStorage.getItem('errorListWhenUpdateInv')) || [];
         var src = document.location.href;
@@ -183,7 +184,7 @@ const update_inv = async (product) => {
     for (let keyIndex = 0; keyIndex < allGoodsList.length; keyIndex++) {
         const product = allGoodsList[keyIndex];
         console.log('');
-        console.log(`正在更新第${keyIndex + 1}/${allGoodsList.length}条: ${product.name} (商品id是: ${product.id}`);
+        console.log(`正在更新第${keyIndex + 1}/${allGoodsList.length}条: ${product.name} (商品id是: ${product.id})`);
         errorListWhenUpdateInv = await update_inv(product);
         errorListWhenUpdateInv = errorListWhenUpdateInv.sort((a, b) => {
             var x = a.name.toLowerCase();

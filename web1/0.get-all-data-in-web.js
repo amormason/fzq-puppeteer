@@ -84,19 +84,19 @@ const getAllDataInWeb = async () => {
         isNeedLogin = false;
     }
 
-    // await page.goto(`https://admin.lashowroom.com/item_dis_cat.php?category_id=all&pd=1&cd=1&sd=d`);
-    // max_page = await page.evaluate(() => {
-    //     return parseInt($("#edit_form > table > tbody > tr:nth-child(3) > td").children(':last-child').text())
-    // });
-    // pageArray = Array.from(Array(max_page), (v, k) => k + 1);
-    // for (let index = 0; index < pageArray.length; index++) {
-    //     const pageNumber = pageArray[index];
-    //     const src = `https://admin.lashowroom.com/item_dis_cat.php?category_id=all&pd=${pageNumber}&cd=1&sd=d`
-    //     const list = await getDataByPage(src, pageNumber);
-    //     goodsListInWeb = [...goodsListInWeb, ...list];
-    //     console.log(`Display的第${pageNumber}/${max_page}页共找到${list.length}个商品`);
-    //     console.log('');
-    // }
+    await page.goto(`https://admin.lashowroom.com/item_dis_cat.php?category_id=all&pd=1&cd=1&sd=d`);
+    max_page = await page.evaluate(() => {
+        return parseInt($("#edit_form > table > tbody > tr:nth-child(3) > td").children(':last-child').text())
+    });
+    pageArray = Array.from(Array(max_page), (v, k) => k + 1);
+    for (let index = 0; index < pageArray.length; index++) {
+        const pageNumber = pageArray[index];
+        const src = `https://admin.lashowroom.com/item_dis_cat.php?category_id=all&pd=${pageNumber}&cd=1&sd=d`
+        const list = await getDataByPage(src, pageNumber);
+        goodsListInWeb = [...goodsListInWeb, ...list];
+        console.log(`Display的第${pageNumber}/${max_page}页共找到${list.length}个商品`);
+        console.log('');
+    }
 
     await page.goto(`https://admin.lashowroom.com/item_rem_cat.php?category_id=all&pr=1&cr=8&sr=d`);
     let list_view_button = await page.$('#list_view_1')

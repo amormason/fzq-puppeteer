@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-const { loginURL, vendorID, password } = require('./config');
+const { loginURL, vendorID, password } = require('../config');
 
 
 const getBaseInfo = async () => {
