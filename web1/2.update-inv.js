@@ -201,7 +201,7 @@ const update_inv = async (product) => {
     const filename = path.join(__dirname, 'data/第1个网站更新结果.xlsx');
     const header_goodsListInWeb = ['商品ID', '商品名称', '商品列表中的页码', 'display属性'];
     const header_idNotFundInWebPage = ['商品名称', '颜色', 'run的名字', '库存数值'];
-    const header_errorListWhenUpdateInv = ['商品ID', '商品名称', '颜色', '详情的链接', '错误的原因'];
+    const header_errorListWhenUpdateInv = ['商品ID', '商品名称', '详情的链接', '错误的原因'];
     var buffer = nodeXlsx.build([
         {
             name: `在第1个网站上没找到的商品--${idNotFundInWebPage.length}条数据`,

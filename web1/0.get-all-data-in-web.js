@@ -11,30 +11,17 @@ let goodsListInWeb = [];
 
 const getDataByPage = async (src, pageNumber) => {
     await page.goto(src);
-
     let list = await page.evaluate((pageNumber) => {
         var listInWeb = [];
-        var _$ = $;
-        _$('tr').each((index, item) => {
-            if (['even', 'odd'].includes(_$(this).attr('class'))) {
-                var id = _$(this).find('td:nth-child(1) a').attr('onclick').match(/\d+/)[0];
-                var name = _$.trim(_$(this).find('td:nth-child(5)').text().replace('\n\n\n\n', '').replace('\n\n \n\n', '').replace('\n\n\n \n', '').replace('\n \n\n\n', ''));
-                listInWeb.push({
-                    id: id,
-                    name,
-                    pageNumber: pageNumber,
-                    display: false
-                });
-            }
-        });
-        _$('.edit-sub').find('li').each(function (index, item) {
-            var name = (_$(this).find('.fix-width-sm').attr('alt')).toUpperCase();
-            var id = _$(_$(this).find('input[type="checkbox"]')[0]).attr('value');
+        $("#edit_form > table > tbody > tr:nth-child(5) > td li").each((index, li) => {
+            var price = parseFloat($(li).find("span:nth-child(6)").text().replace(/[&\|\\\*^%$#@\-]/g, "").trim());
+            var name = $(li).children('.b.f').text().trim().toUpperCase();
+            var id = $(li).find('a').attr('onclick').match(/\d+/)[0];
             listInWeb.push({
                 id: id,
+                price,
                 name,
                 pageNumber: pageNumber,
-                display: true
             });
         });
         return listInWeb;
