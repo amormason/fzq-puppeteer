@@ -177,7 +177,7 @@ function updatePrice() {
             if (x < y) { return -1; }
             if (x > y) { return 1; }
             return 0;
-        })));
+        }));
         var file = path.join(__dirname, './data/第2个网站更新失败记录.json');
         //写入文件
         fs.writeFile(file, content, function (err) {
