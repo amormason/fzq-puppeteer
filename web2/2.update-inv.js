@@ -1,4 +1,5 @@
-const { allGoodsResult } = require('./data/1.match-id.json');
+const { allGoodsResult, idNotFund } = require('./data/1.match-id.json');
+const nodeXlsx = require('node-xlsx')
 const { webToken } = require('./data/0.get-all-data-in-web.json');
 const { getInventoryPromise, updatePromise } = require('./services');
 const path = require('path');
@@ -7,6 +8,19 @@ console.log(`需要更新的商品数量: ${Object.keys(allGoodsResult).length}`
 const updatedGoods = [];
 const errorList = [];
 let currentIndexForDataList = 0;
+const json_to_sheet = (arr) => {
+    let result = [];
+    arr.forEach(element => {
+        let row = [];
+        Object.keys(element).map(col => {
+            if (Object.prototype.toString.call(element[col]) !== '[Object Object]') {
+                row.push(element[col])
+            }
+        })
+        result.push(row);
+    });
+    return result;
+}
 const handleRequest = (product, inventoryResponseData) => {
     const {
         item,
@@ -55,8 +69,8 @@ const handleRequest = (product, inventoryResponseData) => {
             errorList.push({
                 errorMessage: `颜色不匹配：${color}`,
                 URL,
-                productId,
-                productName,
+                id: productId,
+                name: productName,
             });
             console.log(`发生的第${errorList.length}个错误${color}这个颜色在web上没有找到`);
         }
@@ -129,7 +143,7 @@ const handleRequest = (product, inventoryResponseData) => {
         "vendorSettingInfo": []
     }
 }
-function updatePrice() {
+function updateInv() {
     const product = allGoodsResult[currentIndexForDataList];
     if (product) {
         getInventoryPromise(product['id'], webToken).then(getInventoryPromiseRes => {
@@ -139,10 +153,10 @@ function updatePrice() {
                 updatePromise(requestBody, webToken).then(response => {
                     product.requestBody = requestBody;
                     if (response.success) {
-                        console.log(`正在更新第${currentIndexForDataList}/${allGoodsResult.length}个成功`);
+                        console.log(`更新第${currentIndexForDataList}/${allGoodsResult.length}个成功: ${product.name}[${product.id}]`);
                         updatedGoods.push(product);
                     } else {
-                        console.log(`正在更新第${currentIndexForDataList}/${allGoodsResult.length}个失败:${response.message || '发生了错误'}, ${JSON.stringify(product)}`);
+                        console.log(`更新第${currentIndexForDataList}/${allGoodsResult.length}个失败:${response.message || '发生了错误'}, ${JSON.stringify(product)}`);
                         product.message = response.message || '发生了错误';
                         errorList.push(product);
                     }
@@ -153,41 +167,57 @@ function updatePrice() {
                     errorList.push(product);
                 }).finally(() => {
                     currentIndexForDataList++;
-                    updatePrice();
+                    updateInv();
                 });
             } else {
                 currentIndexForDataList++;
-                updatePrice();
+                updateInv();
             }
         }).catch((err) => {
             product.message = '获取商品详情发生错误了哦';
             console.log('******获取详情时候的catch错误信息', err);
             errorList.push(product);
             currentIndexForDataList++;
-            updatePrice();
+            updateInv();
         }).finally(() => {
             // console.log(`获取商品详情完成:${product['id']}`);
             // console.log();
         });;
     } else {
-        console.log('更新价格完成');
-        var content = JSON.stringify(errorList.sort(function (a, b) {
-            var x = a.productName.toLowerCase();
-            var y = b.productName.toLowerCase();
-            if (x < y) { return -1; }
-            if (x > y) { return 1; }
-            return 0;
-        }));
-        var file = path.join(__dirname, './data/第2个网站更新失败记录.json');
-        //写入文件
-        fs.writeFile(file, content, function (err) {
+        console.log('更库存完成');
+        const headers1 = ['报错原因', '报错页面', '商品ID', '商品名称'];
+        const headers2 = ['商品名称', '颜色', 'run', '目标库存值'];
+        // 自动生成需要上传的文件;
+        var buffer_out = nodeXlsx.build([{
+            name: `更新时报错记录${errorList.length}条`,
+            data: [headers1, ...json_to_sheet(errorList.sort(function (a, b) {
+                var x = a.name.toLowerCase();
+                var y = b.name.toLowerCase();
+                if (x < y) { return -1; }
+                if (x > y) { return 1; }
+                return 0;
+            }))]
+        }, {
+            name: `更新前匹配id错误${idNotFund.length}条`,
+            data: [headers2, ...idNotFund.sort(function (a, b) {
+                var x = a[0].toLowerCase();
+                var y = b[0].toLowerCase();
+                if (x < y) { return -1; }
+                if (x > y) { return 1; }
+                return 0;
+            })]
+        }
+        ]);
+        var filePath_out = `${__dirname}/data/第2个网站的更新库存结果.xlsx`;
+        fs.appendFile(filePath_out, buffer_out, function (err) {
             if (err) {
-                return console.log(err);
+                console.log(err, '保存excel出错');
+            } else {
+                console.log(`写入excel[${filePath_out}]成功!!!`);
             }
-            console.log('文件创建成功，地址：' + file);
         });
 
 
     }
 }
-updatePrice();
+updateInv();
