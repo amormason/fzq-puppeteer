@@ -1,0 +1,1 @@
+node 0.get-all-data-in-web.js  && node 1.match-id.js  &&  node 2.update-inv.js
