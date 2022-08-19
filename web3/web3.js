@@ -78,7 +78,7 @@ const updateInv = async (product, keyIndex, leng) => {
         await page.waitForNavigation();
         await page.waitForTimeout(1000);
         const view_later_button = await page.$('#id-btn-su-view-later');
-        await view_later_button.click();
+        await view_later_button  && view_later_button.click();
         isFirstTime = false;
     }
 
